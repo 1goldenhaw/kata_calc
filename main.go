@@ -153,8 +153,8 @@ func main() {
 	} else if !(err1 == nil && err2 == nil) { // Если в число преобразовать удалось только один аргумент
 		panic("Паника! Нужно указывать числа в одном формате. Оба числа арабские или оба числа римские")
 	} else { // Если в число преобразовать удалось оба слова
-		if firstNumber > 10 || secondNumber > 10 {
-			panic("Введено число больше 10.")
+		if firstNumber > 10 || firstNumber < -10 || secondNumber > 10 || secondNumber < -10 {
+			panic("Введено число больше 10 (или меньше -10)")
 		}
 		result := firstNumber
 		switch operand {
@@ -162,13 +162,14 @@ func main() {
 			result += secondNumber
 		case "-":
 			result -= secondNumber
-		case "/": {
-			if secondNumber != 0 {
-				result /= secondNumber
-			} else {
-				panic ("Деление на ноль!")
+		case "/":
+			{
+				if secondNumber != 0 {
+					result /= secondNumber
+				} else {
+					panic("Деление на ноль!")
+				}
 			}
-		}
 		case "*":
 			result *= secondNumber
 		case "default":
