@@ -12,22 +12,19 @@
 10) Результатом работы калькулятора с арабскими числами могут быть отрицательные числа и ноль. Результатом работы калькулятора с римскими числами могут быть только положительные числа, если результат работы меньше единицы, программа должна выдать панику.
 */
 
-/*
-На текущий момент не выполняется 3 и 6 пункты. 
-*/
-
-
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
 
 // Преобразование римских чисел в арабские
 func romanToInt(s string) (int, error) {
-	romanNumerals := map[rune]int{
+	romanNumerals := map[rune]int{ // Создаём словарь римских чисел с отображением в арабские
 		'I': 1,
 		'V': 5,
 		'X': 10,
@@ -40,12 +37,15 @@ func romanToInt(s string) (int, error) {
 	total := 0
 	prevValue := 0
 
-	// Приводим входное значение к верхнему регистру
-	s = strings.ToUpper(s)
+	s = strings.ToUpper(s) // Для удобства приводим входное значение к верхнему регистру
+	_, err3 := checkRoman(s)
+	if err3 != nil {
+		return 0, fmt.Errorf("Неверная запись римского числа!")
+	}
 
 	for _, char := range s {
 		currentValue, exists := romanNumerals[char]
-		if !exists {
+		if !exists { // Возвращаем ошибку, преобразование не удалось - левый символ!
 			return 0, fmt.Errorf("недопустимый символ: %c", char)
 		}
 
@@ -62,52 +62,115 @@ func romanToInt(s string) (int, error) {
 	return total, nil
 }
 
-func main() {
-	input := make([]string, 4)
-	fmt.Println("Введите строку в формате 'число операция число':")
-	_, err := fmt.Scanln(&input[0], &input[1], &input[2])
-	if err != nil {
-		fmt.Println("Паника! Должно быть всего 2 аргумента и один знак операции", err)
-		return
+// Преобразование арабских чисел в римские
+func arabicToRoman(num int) string {
+	if num < 1 || num > 3999 {
+		return "Число должно быть в диапазоне от 1 до 3999"
 	}
 
-	// Проверяем количество частей
-	if input[3] != "" {
-		fmt.Println(`Паника! Необходимо ввести строку в формате 'число операция число'`)
-		return
+	// массивы значений и римских символов
+	values := []int{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1}
+	symbols := []string{"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"}
+
+	roman := ""
+
+	for i := 0; i < len(values); i++ {
+		for num >= values[i] {
+			roman += symbols[i]
+			num -= values[i]
+		}
 	}
-	// Преобразуем первое и третье поле в числа
-	firstNumber, err1 := strconv.Atoi(input[0])
+	return roman
+}
+
+func checkRoman(w string) (int, error) {
+	romans := make(map[string]int) // Создаём словарь римских чисел меньше 10
+	romans["I"] = 1
+	romans["II"] = 2
+	romans["III"] = 3
+	romans["IV"] = 4
+	romans["V"] = 5
+	romans["VI"] = 6
+	romans["VII"] = 7
+	romans["VII"] = 8
+	romans["IX"] = 9
+	romans["X"] = 10
+	if number, found := romans[w]; found { // Проверяем пришедшее число, есть ли оно в списке
+		return 0, nil
+	} else {
+		return 1, fmt.Errorf("Слово %q найдено, его значение: %d", number)
+	}
+}
+
+func main() {
+	fmt.Println("Введите строку в формате 'число операция число':")
+	var line string
+	scanner := bufio.NewScanner(os.Stdin) // Инициализируем сканнер
+	if scanner.Scan() {                   // Получаем введенную строку с пробелами
+		line = scanner.Text()
+	}
+	if err := scanner.Err(); err != nil { // Обрабатываем ошибки ввода
+		panic("Ошибка при чтении!")
+	}
+	elements := strings.Fields(line) // Создаём массив слов из строки
+	input := make([]string, 4)       // Инициализируем слайс, в котором будет проверка на переполнение элементов
+	var i = 0                        // просто счётчик
+	for _, element := range elements {
+		if i < len(input) {
+			input[i] = element
+			i++
+		} else { // Если хотя бы на один элемент напечатано больше, чем нам надо - выдаём панику
+			panic("Введено 2-х больше аргументов / больше одной операции!")
+		}
+	}
+
+	firstNumber, err1 := strconv.Atoi(input[0]) // Преобразуем первое и третье слова в числа
 	secondNumber, err2 := strconv.Atoi(input[2])
-	operand := input[1]
-	if err1 != nil && err2 != nil {
+	operand := input[1]             // Запоминаем в отдельную переменную строку знак операции
+	if err1 != nil && err2 != nil { // Если обе строки не удалось преобразовать в число, то проверяем их на Римскость
 		var arabic1, arabic2 int
 		var result int
-		arabic1, _ = romanToInt(input[0])
-		arabic2, _ = romanToInt(input[2])
-		result = arabic1
-		switch operand {
+		arabic1, err3 := romanToInt(input[0])
+		arabic2, err4 := romanToInt(input[2])
+		if arabic1 > 10 || arabic2 > 10 { // Тут проверяем больше ли хотя бы одно из введённых чисел 10 или нет
+			panic("Введено число больше 10.")
+		}
+		if err3 != nil || err4 != nil { // Тут после проверки на Римскость получаем результат. Если ошибка есть - паника
+			panic("Паника! Одно из введённых римских чисел не существует или оно больше 10")
+		}
+		result = arabic1 // В результат промежуточно помещаем первое число.
+		switch operand { // Расшифровываем "операцию" и выполняем её!
 		case "+":
 			result += arabic2
 		case "-":
 			result -= arabic2
 		case "/":
-			result /= arabic2
+			{
+				if arabic2 == 0 {
+					panic("Деление на ноль!")
+				} else {
+					result /= arabic2
+				}
+			}
 		case "*":
 			result *= arabic2
-		case "default":
-			fmt.Println("Паника! Нет такой операции.")
-			return
+		case "default": // Если введённый символ операции не распознан - паника!
+			panic("Паника! Нет такой операции.")
 		}
-		if result >= 0 {
-			fmt.Println(result)
+		if result >= 0 { // Перед печатью проверяем, чтобы результат операции с римскими числами был не отрицательным
+			var resultRoman string
+			resultRoman = arabicToRoman(result) /// Преобразование обратно в римские!
+			fmt.Println(resultRoman)
 			return
 		} else {
-			fmt.Println("Паника! Результат операции с римскими числами должен быть больше 0")
+			panic("Паника! Результат операции с римскими числами должен быть больше 0")
 		}
-	} else if !(err1 == nil && err2 == nil) {
-		fmt.Println("Паника! Нужно указывать числа в одном формате. Оба числа арабские или оба числа римские")
-	} else {
+	} else if !(err1 == nil && err2 == nil) { // Если в число преобразовать удалось только один аргумент
+		panic("Паника! Нужно указывать числа в одном формате. Оба числа арабские или оба числа римские")
+	} else { // Если в число преобразовать удалось оба слова
+		if firstNumber > 10 || secondNumber > 10 {
+			panic("Введено число больше 10.")
+		}
 		result := firstNumber
 		switch operand {
 		case "+":
@@ -115,12 +178,17 @@ func main() {
 		case "-":
 			result -= secondNumber
 		case "/":
-			result /= secondNumber * 1.0
+			{
+				if secondNumber == 0 {
+					panic("Деление на ноль!")
+				} else {
+					result /= secondNumber
+				}
+			}
 		case "*":
 			result *= secondNumber
 		case "default":
-			fmt.Println("Паника! Нет такой операции.")
-			return
+			panic("Паника! Нет такой операции.")
 		}
 		fmt.Println(result)
 	}
