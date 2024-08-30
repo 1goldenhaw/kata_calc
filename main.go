@@ -64,10 +64,6 @@ func romanToInt(s string) (int, error) {
 
 // Преобразование арабских чисел в римские
 func arabicToRoman(num int) string {
-	if num < 1 || num > 3999 {
-		return "Число должно быть в диапазоне от 1 до 3999"
-	}
-
 	// массивы значений и римских символов
 	values := []int{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1}
 	symbols := []string{"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"}
@@ -95,10 +91,10 @@ func checkRoman(w string) (int, error) {
 	romans["VII"] = 8
 	romans["IX"] = 9
 	romans["X"] = 10
-	if number, found := romans[w]; found { // Проверяем пришедшее число, есть ли оно в списке
+	if _, found := romans[w]; found { // Проверяем пришедшее число, есть ли оно в списке
 		return 0, nil
 	} else {
-		return 1, fmt.Errorf("Слово %q найдено, его значение: %d", number)
+		return 1, fmt.Errorf("Римское число %q не существует", w)
 	}
 }
 
@@ -113,27 +109,20 @@ func main() {
 		panic("Ошибка при чтении!")
 	}
 	elements := strings.Fields(line) // Создаём массив слов из строки
-	input := make([]string, 4)       // Инициализируем слайс, в котором будет проверка на переполнение элементов
-	var i = 0                        // просто счётчик
-	for _, element := range elements {
-		if i < len(input) {
-			input[i] = element
-			i++
-		} else { // Если хотя бы на один элемент напечатано больше, чем нам надо - выдаём панику
-			panic("Введено 2-х больше аргументов / больше одной операции!")
-		}
+	if len(elements) > 4 {           // Если хотя бы на один элемент напечатано больше, чем нам надо - выдаём панику
+		panic("Введено 2-х больше аргументов / больше одной операции!")
 	}
 
-	firstNumber, err1 := strconv.Atoi(input[0]) // Преобразуем первое и третье слова в числа
-	secondNumber, err2 := strconv.Atoi(input[2])
-	operand := input[1]             // Запоминаем в отдельную переменную строку знак операции
+	firstNumber, err1 := strconv.Atoi(elements[0]) // Преобразуем первое и третье слова в числа
+	secondNumber, err2 := strconv.Atoi(elements[2])
+	operand := elements[1]          // Запоминаем в отдельную переменную строку знак операции
 	if err1 != nil && err2 != nil { // Если обе строки не удалось преобразовать в число, то проверяем их на Римскость
 		var arabic1, arabic2 int
 		var result int
-		arabic1, err3 := romanToInt(input[0])
-		arabic2, err4 := romanToInt(input[2])
-		if arabic1 > 10 || arabic2 > 10 { // Тут проверяем больше ли хотя бы одно из введённых чисел 10 или нет
-			panic("Введено число больше 10.")
+		arabic1, err3 := romanToInt(elements[0])
+		arabic2, err4 := romanToInt(elements[2])
+		if arabic1 > 10 || arabic2 > 10 || arabic1 < 1 || arabic2 < 1 { // Тут проверяем больше ли хотя бы одно из введённых чисел 10 или нет
+			panic("Введено число больше 10 или меньше 1.")
 		}
 		if err3 != nil || err4 != nil { // Тут после проверки на Римскость получаем результат. Если ошибка есть - паника
 			panic("Паника! Одно из введённых римских чисел не существует или оно больше 10")
@@ -145,19 +134,13 @@ func main() {
 		case "-":
 			result -= arabic2
 		case "/":
-			{
-				if arabic2 == 0 {
-					panic("Деление на ноль!")
-				} else {
-					result /= arabic2
-				}
-			}
+			result /= arabic2
 		case "*":
 			result *= arabic2
 		case "default": // Если введённый символ операции не распознан - паника!
 			panic("Паника! Нет такой операции.")
 		}
-		if result >= 0 { // Перед печатью проверяем, чтобы результат операции с римскими числами был не отрицательным
+		if result > 0 { // Перед печатью проверяем, чтобы результат операции с римскими числами был положительным
 			var resultRoman string
 			resultRoman = arabicToRoman(result) /// Преобразование обратно в римские!
 			fmt.Println(resultRoman)
@@ -178,13 +161,7 @@ func main() {
 		case "-":
 			result -= secondNumber
 		case "/":
-			{
-				if secondNumber == 0 {
-					panic("Деление на ноль!")
-				} else {
-					result /= secondNumber
-				}
-			}
+			result /= secondNumber
 		case "*":
 			result *= secondNumber
 		case "default":
@@ -193,3 +170,4 @@ func main() {
 		fmt.Println(result)
 	}
 }
+
