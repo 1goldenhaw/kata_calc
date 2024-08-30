@@ -162,8 +162,13 @@ func main() {
 			result += secondNumber
 		case "-":
 			result -= secondNumber
-		case "/":
-			result /= secondNumber
+		case "/": {
+			if secondNumber != 0 {
+				result /= secondNumber
+			} else {
+				panic ("Деление на ноль!")
+			}
+		{
 		case "*":
 			result *= secondNumber
 		case "default":
