@@ -168,7 +168,7 @@ func main() {
 			} else {
 				panic ("Деление на ноль!")
 			}
-		{
+		}
 		case "*":
 			result *= secondNumber
 		case "default":
