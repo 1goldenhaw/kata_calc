@@ -88,7 +88,7 @@ func checkRoman(w string) (int, error) {
 	romans["V"] = 5
 	romans["VI"] = 6
 	romans["VII"] = 7
-	romans["VII"] = 8
+	romans["VIII"] = 8
 	romans["IX"] = 9
 	romans["X"] = 10
 	if _, found := romans[w]; found { // Проверяем пришедшее число, есть ли оно в списке
