@@ -40,7 +40,7 @@ func romanToInt(s string) (int, error) {
 	s = strings.ToUpper(s) // Для удобства приводим входное значение к верхнему регистру
 	_, err3 := checkRoman(s)
 	if err3 != nil {
-		return 0, fmt.Errorf("Неверная запись римского числа!")
+		return 0, fmt.Errorf("неверная запись римского числа")
 	}
 
 	for _, char := range s {
@@ -94,14 +94,14 @@ func checkRoman(w string) (int, error) {
 	if _, found := romans[w]; found { // Проверяем пришедшее число, есть ли оно в списке
 		return 0, nil
 	} else {
-		return 1, fmt.Errorf("Римское число %q не существует", w)
+		return 1, fmt.Errorf("римское число %q не существует", w)
 	}
 }
 
 func main() {
 	fmt.Println("Введите строку в формате 'число операция число':")
 	var line string
-	scanner := bufio.NewScanner(os.Stdin) // Инициализируем сканнер
+	scanner := bufio.NewScanner(os.Stdin) // Инициализируем сканер
 	if scanner.Scan() {                   // Получаем введенную строку с пробелами
 		line = scanner.Text()
 	}
@@ -163,13 +163,7 @@ func main() {
 		case "-":
 			result -= secondNumber
 		case "/":
-			{
-				if secondNumber != 0 {
-					result /= secondNumber
-				} else {
-					panic("Деление на ноль!")
-				}
-			}
+			result /= secondNumber
 		case "*":
 			result *= secondNumber
 		case "default":
